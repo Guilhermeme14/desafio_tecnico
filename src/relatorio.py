@@ -4,39 +4,11 @@ from datetime import datetime
 
 import pandas as pd
 
+from ..helpers.estados import ESTADOS
+
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
-
-ESTADOS = {
-    "AC": "Acre",
-    "AL": "Alagoas",
-    "AP": "Amapá",
-    "AM": "Amazonas",
-    "BA": "Bahia",
-    "CE": "Ceará",
-    "DF": "Distrito Federal",
-    "ES": "Espírito Santo",
-    "GO": "Goiás",
-    "MA": "Maranhão",
-    "MT": "Mato Grosso",
-    "MS": "Mato Grosso do Sul",
-    "MG": "Minas Gerais",
-    "PA": "Pará",
-    "PB": "Paraíba",
-    "PR": "Paraná",
-    "PE": "Pernambuco",
-    "PI": "Piauí",
-    "RJ": "Rio de Janeiro",
-    "RN": "Rio Grande do Norte",
-    "RS": "Rio Grande do Sul",
-    "RO": "Rondônia",
-    "RR": "Roraima",
-    "SC": "Santa Catarina",
-    "SP": "São Paulo",
-    "SE": "Sergipe",
-    "TO": "Tocantins",
-}
 
 
 class RelatorioGenerator:
@@ -59,13 +31,10 @@ class RelatorioGenerator:
         if pd.isna(data):
             return data
         try:
-            # Se data é um Timestamp ou datetime, converte diretamente para o formato desejado
             if isinstance(data, (pd.Timestamp, datetime)):
-                data_obj = pd.to_datetime(data)  # Garante que é um objeto datetime
+                data_obj = pd.to_datetime(data)
             else:
-                # Converte a string para um objeto datetime
                 data_obj = pd.to_datetime(data, format="%d/%m/%Y", errors="coerce")
-            # Formata a data para o formato desejado
             return (
                 data_obj.strftime("%d/%B/%Y").capitalize()
                 if not pd.isna(data_obj)
@@ -79,7 +48,26 @@ class RelatorioGenerator:
         if pd.isna(valor):
             return valor
         try:
-            return f"{float(valor):,.2f}".replace(".", ",")
+            valor_str = str(valor)
+            if "," in valor_str and len(valor_str.split(",")[-1]) == 2:
+                return valor
+            valor_limpo = (
+                str(valor)
+                .replace(".", "")
+                .replace("/", "")
+                .replace("-", "")
+                .replace(",", "")
+            )
+
+            valor_inteiro = int(valor_limpo)
+
+            valor_float = valor_inteiro / 100
+
+            return (
+                f"{valor_float:,.2f}".replace(",", "@")
+                .replace(".", ",")
+                .replace("@", ".")
+            )
         except ValueError:
             return valor
 
