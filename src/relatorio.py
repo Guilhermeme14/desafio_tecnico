@@ -1,10 +1,11 @@
+import locale
 import logging
 import sys
 from datetime import datetime
 
 import pandas as pd
 
-from ..helpers.estados import ESTADOS
+from estados import ESTADOS
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -28,18 +29,13 @@ class RelatorioGenerator:
 
     @staticmethod
     def formatar_data(data):
+        locale.setlocale(locale.LC_ALL, 'pt_BR')
         if pd.isna(data):
             return data
         try:
             if isinstance(data, (pd.Timestamp, datetime)):
                 data_obj = pd.to_datetime(data)
-            else:
-                data_obj = pd.to_datetime(data, format="%d/%m/%Y", errors="coerce")
-            return (
-                data_obj.strftime("%d/%B/%Y").capitalize()
-                if not pd.isna(data_obj)
-                else None
-            )
+                return data_obj.strftime("%d/%b/%Y").capitalize()
         except ValueError:
             return None
 
@@ -53,9 +49,6 @@ class RelatorioGenerator:
                 return valor
             valor_limpo = (
                 str(valor)
-                .replace(".", "")
-                .replace("/", "")
-                .replace("-", "")
                 .replace(",", "")
             )
 
@@ -64,9 +57,8 @@ class RelatorioGenerator:
             valor_float = valor_inteiro / 100
 
             return (
-                f"{valor_float:,.2f}".replace(",", "@")
+                f"{valor_float:,.2f}"
                 .replace(".", ",")
-                .replace("@", ".")
             )
         except ValueError:
             return valor
@@ -96,8 +88,9 @@ class RelatorioGenerator:
 
             df_final = df_final.sort_values(by=colunas_originais[7])
 
-            df_final.to_csv(self.output_file, index=False, sep=";")
-            logging.info(f"Relatório gerado com sucesso no arquivo {self.output_file}.")
+            df_final.to_csv(self.output_file, index=False, sep=";", encoding='utf-8')
+            logging.info(f"Relatório gerado com sucesso no arquivo {
+                         self.output_file}.")
 
         except Exception as e:
             logging.error(f"Erro ao processar o arquivo: {e}")

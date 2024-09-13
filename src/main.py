@@ -15,7 +15,6 @@ def main():
     input_file = sys.argv[1]
     output_file = sys.argv[2]
 
-    # Criar instância da classe e processar dados
     try:
         relatorio = RelatorioGenerator(input_file, output_file)
         relatorio.processar_dados()
@@ -25,3 +24,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# execução: python src/main.py data/arquivo_entrada.xlsx data/relatorio_gerado.csv
